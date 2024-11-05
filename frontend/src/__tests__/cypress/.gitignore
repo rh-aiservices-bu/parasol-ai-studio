@@ -1,0 +1,4 @@
+cypress/downloads
+coverage
+results
+.nyc_output

@@ -1,0 +1,23 @@
+# editor
+.idea/
+.vscode/
+
+# misc
+.DS_Store
+
+.env*.local
+
+node_modules
+logs
+
+.docs
+.gitkeep
+.eslintcache
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+yarn.lock
+
+# snyk cache file
+.dccache
