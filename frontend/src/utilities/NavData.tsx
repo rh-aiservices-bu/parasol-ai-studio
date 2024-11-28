@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { SupportedArea, useIsAreaAvailable } from '~/concepts/areas';
 import { useUser } from '~/redux/selectors';
+import { useMode } from '~/redux/selectors/mode';
 import {
   artifactsRootPath,
   executionsRootPath,
@@ -202,14 +203,31 @@ const useSettingsNav = (): NavDataGroup[] => {
   ];
 };
 
-export const useBuildNavData = (): NavDataItem[] => [
-  ...useHomeNav(),
-  ...useApplicationsNav(),
-  ...useDSProjectsNav(),
-  ...useDSPipelinesNav(),
-  ...useDistributedWorkloadsNav(),
-  ...useModelServingNav(),
-  ...useModelRegistrySectionNav(),
-  ...useResourcesNav(),
-  ...useSettingsNav(),
-];
+export const useBuildNavData = (): NavDataItem[] => {
+  const homeNav = useHomeNav();
+  const applicationsNav = useApplicationsNav();
+  const dsProjectsNav = useDSProjectsNav();
+  const dsPipelinesNav = useDSPipelinesNav();
+  const distributedWorkloadsNav = useDistributedWorkloadsNav();
+  const modelServingNav = useModelServingNav();
+  const modelRegistrySectionNav = useModelRegistrySectionNav();
+  const resourcesNav = useResourcesNav();
+  const settingsNav = useSettingsNav();
+  const { isEasyMode } = useMode();
+
+  if (isEasyMode) {
+    return [...dsProjectsNav];
+  }
+
+  return [
+    ...homeNav,
+    ...applicationsNav,
+    ...dsProjectsNav,
+    ...dsPipelinesNav,
+    ...distributedWorkloadsNav,
+    ...modelServingNav,
+    ...modelRegistrySectionNav,
+    ...resourcesNav,
+    ...settingsNav,
+  ];
+};

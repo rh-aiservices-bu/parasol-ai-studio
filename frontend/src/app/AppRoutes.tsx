@@ -92,6 +92,7 @@ const AppRoutes: React.FC = () => {
         ) : (
           <Route path="/" element={<InstalledApplications />} />
         )}
+
         <Route path="/explore" element={<ExploreApplications />} />
         <Route path="/resources" element={<LearningCenterPage />} />
 

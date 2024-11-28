@@ -35,6 +35,11 @@ export const getAllowedUsers = (notebookNamespace: string): Promise<AllowedUser[
   return axios.get(url).then((response) => response.data);
 };
 
+export const switchEasyMode = (): GetUserAction => ({
+  type: Actions.SWITCH_EASY_MODE,
+  payload: {},
+});
+
 let notificationCount = 0;
 
 export const addNotification =

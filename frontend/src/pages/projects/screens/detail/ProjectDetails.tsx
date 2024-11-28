@@ -15,6 +15,7 @@ import { ProjectSectionID } from '~/pages/projects/screens/detail/types';
 import { AccessReviewResourceAttributes } from '~/k8sTypes';
 import { useAccessReview } from '~/api';
 import { getDescriptionFromK8sResource, getDisplayNameFromK8sResource } from '~/concepts/k8s/utils';
+import { useMode } from '~/redux/selectors/mode';
 import useCheckLogoutParams from './useCheckLogoutParams';
 import ProjectOverview from './overview/ProjectOverview';
 import NotebookList from './notebooks/NotebookList';
@@ -44,6 +45,7 @@ const ProjectDetails: React.FC = () => {
     ...accessReviewResource,
     namespace: currentProject.metadata.name,
   });
+  const { isEasyMode } = useMode();
 
   useCheckLogoutParams();
 
@@ -51,9 +53,15 @@ const ProjectDetails: React.FC = () => {
     <GenericHorizontalBar
       activeKey={state}
       sections={[
-        { id: ProjectSectionID.OVERVIEW, title: 'Overview', component: <ProjectOverview /> },
-        { id: ProjectSectionID.WORKBENCHES, title: 'Workbenches', component: <NotebookList /> },
-        ...(pipelinesEnabled
+        ...(!isEasyMode
+          ? [{ id: ProjectSectionID.OVERVIEW, title: 'Overview', component: <ProjectOverview /> }]
+          : []),
+        {
+          id: ProjectSectionID.WORKBENCHES,
+          title: 'Workbenches',
+          component: <NotebookList />,
+        },
+        ...(pipelinesEnabled && !isEasyMode
           ? [
               {
                 id: ProjectSectionID.PIPELINES,
@@ -62,7 +70,7 @@ const ProjectDetails: React.FC = () => {
               },
             ]
           : []),
-        ...(modelServingEnabled
+        ...(modelServingEnabled && !isEasyMode
           ? [
               {
                 id: ProjectSectionID.MODEL_SERVER,
@@ -71,17 +79,25 @@ const ProjectDetails: React.FC = () => {
               },
             ]
           : []),
-        {
-          id: ProjectSectionID.CLUSTER_STORAGES,
-          title: 'Cluster storage',
-          component: <StorageList />,
-        },
-        {
-          id: ProjectSectionID.DATA_CONNECTIONS,
-          title: 'Data connections',
-          component: <DataConnectionsList />,
-        },
-        ...(projectSharingEnabled && allowCreate
+        ...(!isEasyMode
+          ? [
+              {
+                id: ProjectSectionID.CLUSTER_STORAGES,
+                title: 'Cluster storage',
+                component: <StorageList />,
+              },
+            ]
+          : []),
+        ...(!isEasyMode
+          ? [
+              {
+                id: ProjectSectionID.DATA_CONNECTIONS,
+                title: 'Data connections',
+                component: <DataConnectionsList />,
+              },
+            ]
+          : []),
+        ...(projectSharingEnabled && allowCreate && !isEasyMode
           ? [
               {
                 id: ProjectSectionID.PERMISSIONS,
@@ -90,7 +106,7 @@ const ProjectDetails: React.FC = () => {
               },
             ]
           : []),
-        ...(biasMetricsAreaAvailable && allowCreate
+        ...(biasMetricsAreaAvailable && allowCreate && !isEasyMode
           ? [
               {
                 id: ProjectSectionID.SETTINGS,

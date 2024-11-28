@@ -11,6 +11,7 @@ export const DEV_MODE = process.env.APP_ENV === 'development';
 export const DEV_IMPERSONATE_USER = DEV_MODE ? process.env.DEV_IMPERSONATE_USER : undefined;
 export const DEV_IMPERSONATE_PASSWORD = DEV_MODE ? process.env.DEV_IMPERSONATE_PASSWORD : undefined;
 export const APP_ENV = process.env.APP_ENV;
+export const GENAI_MODE = process.env.GENAI_MODE === 'true';
 
 export const USER_ACCESS_TOKEN = 'x-forwarded-access-token';
 

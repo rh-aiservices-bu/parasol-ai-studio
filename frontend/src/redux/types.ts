@@ -10,6 +10,7 @@ export enum Actions {
   ACK_NOTIFICATION = 'ACK_NOTIFICATION',
   REMOVE_NOTIFICATION = 'REMOVE_NOTIFICATION',
   FORCE_COMPONENTS_UPDATE = 'FORCE_COMPONENTS_UPDATE',
+  SWITCH_EASY_MODE = 'SWITCH_EASY_MODE',
 }
 
 export interface AppNotification {
@@ -35,6 +36,7 @@ export interface GetUserAction {
     error?: Error | null;
     notification?: AppNotification;
     isImpersonating?: boolean;
+    isEasyMode?: boolean;
   };
 }
 
@@ -45,6 +47,7 @@ export type AppState = {
   userLoading: boolean;
   userError?: Error | null;
   isImpersonating?: boolean;
+  isEasyMode?: boolean;
 
   serverURL?: string;
   clusterID?: string;

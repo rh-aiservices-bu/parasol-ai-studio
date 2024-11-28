@@ -4,6 +4,7 @@ const initialState: AppState = {
   userLoading: false,
   notifications: [],
   forceComponentsUpdate: 0,
+  isEasyMode: false,
 };
 //eslint-disable-next-line @typescript-eslint/default-param-last
 const appReducer = (state: AppState = initialState, action: GetUserAction): AppState => {
@@ -103,6 +104,11 @@ const appReducer = (state: AppState = initialState, action: GetUserAction): AppS
       return {
         ...state,
         forceComponentsUpdate: state.forceComponentsUpdate + 1,
+      };
+    case Actions.SWITCH_EASY_MODE:
+      return {
+        ...state,
+        isEasyMode: !state.isEasyMode,
       };
     default:
       return state;

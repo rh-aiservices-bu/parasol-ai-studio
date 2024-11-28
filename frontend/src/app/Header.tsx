@@ -7,11 +7,18 @@ import {
   MastheadMain,
   MastheadToggle,
   PageToggleButton,
+  Switch,
+  Text,
+  TextContent,
+  TextVariants,
 } from '@patternfly/react-core';
 import { BarsIcon } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
 import { ODH_LOGO, ODH_PRODUCT_NAME } from '~/utilities/const';
 import { useUser } from '~/redux/selectors';
+import { useMode } from '~/redux/selectors/mode';
+import { useAppDispatch } from '~/redux/hooks';
+import { switchEasyMode } from '~/redux/actions/actions';
 import HeaderTools from './HeaderTools';
 
 type HeaderProps = {
@@ -23,7 +30,12 @@ const MastheadBranchComponent: React.FC<React.ComponentProps<typeof Link>> = (pr
 );
 
 const Header: React.FC<HeaderProps> = ({ onNotificationsClick }) => {
+  const dispatch = useAppDispatch();
   const { isAllowed } = useUser();
+  const { isEasyMode } = useMode();
+  const handleEasyModeToggle = () => {
+    dispatch(switchEasyMode());
+  };
   return (
     <Masthead role="banner" aria-label="page masthead">
       {isAllowed && (
@@ -41,6 +53,24 @@ const Header: React.FC<HeaderProps> = ({ onNotificationsClick }) => {
             alt={`${ODH_PRODUCT_NAME} Logo`}
           />
         </MastheadBrand>
+        <Switch
+          id="easymode-switch"
+          isChecked={isEasyMode}
+          onChange={handleEasyModeToggle}
+          ouiaId="EasyModeSwitch"
+          className="padding-left-10"
+        />
+        <TextContent>
+          {isEasyMode ? (
+            <Text component={TextVariants.h2} style={{ paddingLeft: '10px' }}>
+              &nbsp;Easy Mode
+            </Text>
+          ) : (
+            <Text component={TextVariants.h2} style={{ paddingLeft: '10px' }}>
+              &nbsp;Normal Mode
+            </Text>
+          )}
+        </TextContent>
       </MastheadMain>
       <MastheadContent>
         <HeaderTools onNotificationsClick={onNotificationsClick} />

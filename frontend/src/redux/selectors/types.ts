@@ -15,3 +15,7 @@ export type ClusterState = {
   clusterID?: string;
   serverURL?: string;
 };
+
+export type ModeState = {
+  isEasyMode: boolean;
+};
