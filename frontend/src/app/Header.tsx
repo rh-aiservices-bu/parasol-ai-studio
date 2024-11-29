@@ -53,6 +53,9 @@ const Header: React.FC<HeaderProps> = ({ onNotificationsClick }) => {
             alt={`${ODH_PRODUCT_NAME} Logo`}
           />
         </MastheadBrand>
+      </MastheadMain>
+      <MastheadContent>
+        <HeaderTools onNotificationsClick={onNotificationsClick} />
         <Switch
           id="easymode-switch"
           isChecked={isEasyMode}
@@ -60,20 +63,6 @@ const Header: React.FC<HeaderProps> = ({ onNotificationsClick }) => {
           ouiaId="EasyModeSwitch"
           className="padding-left-10"
         />
-        <TextContent>
-          {isEasyMode ? (
-            <Text component={TextVariants.h2} style={{ paddingLeft: '10px' }}>
-              &nbsp;Easy Mode
-            </Text>
-          ) : (
-            <Text component={TextVariants.h2} style={{ paddingLeft: '10px' }}>
-              &nbsp;Normal Mode
-            </Text>
-          )}
-        </TextContent>
-      </MastheadMain>
-      <MastheadContent>
-        <HeaderTools onNotificationsClick={onNotificationsClick} />
       </MastheadContent>
     </Masthead>
   );

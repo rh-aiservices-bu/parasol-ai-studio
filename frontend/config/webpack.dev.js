@@ -28,7 +28,7 @@ module.exports = merge(
   webpackCommon('development'),
   {
     mode: 'development',
-    devtool: 'eval-source-map',
+    devtool: 'eval',
     devServer: {
       host: HOST,
       port: PORT,

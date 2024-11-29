@@ -58,6 +58,11 @@ const useDSProjectsNav = (): NavDataItem[] =>
     { id: 'dsg', label: 'Data Science Projects', href: '/projects' },
   ]);
 
+const useDSProjectsNavEasy = (): NavDataItem[] =>
+  useAreaCheck(SupportedArea.DS_PROJECTS_VIEW, [
+    { id: 'dsg', label: 'My Projects', href: '/projects' },
+  ]);
+
 const useDSPipelinesNav = (): NavDataItem[] => {
   const isAvailable = useIsAreaAvailable(SupportedArea.DS_PIPELINES).status;
   const isExperimentsAvailable = useIsAreaAvailable(SupportedArea.PIPELINE_EXPERIMENTS).status;
@@ -207,6 +212,7 @@ export const useBuildNavData = (): NavDataItem[] => {
   const homeNav = useHomeNav();
   const applicationsNav = useApplicationsNav();
   const dsProjectsNav = useDSProjectsNav();
+  const dsProjectsNavEasy = useDSProjectsNavEasy();
   const dsPipelinesNav = useDSPipelinesNav();
   const distributedWorkloadsNav = useDistributedWorkloadsNav();
   const modelServingNav = useModelServingNav();
@@ -216,7 +222,7 @@ export const useBuildNavData = (): NavDataItem[] => {
   const { isEasyMode } = useMode();
 
   if (isEasyMode) {
-    return [...dsProjectsNav];
+    return [...dsProjectsNavEasy];
   }
 
   return [

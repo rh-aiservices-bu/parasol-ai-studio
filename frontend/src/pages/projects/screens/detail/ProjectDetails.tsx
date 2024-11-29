@@ -24,6 +24,7 @@ import DataConnectionsList from './data-connections/DataConnectionsList';
 import PipelinesSection from './pipelines/PipelinesSection';
 
 import './ProjectDetails.scss';
+import NotebookListEasy from './notebooks/NotebookListEasy';
 
 const accessReviewResource: AccessReviewResourceAttributes = {
   group: 'rbac.authorization.k8s.io',
@@ -46,6 +47,12 @@ const ProjectDetails: React.FC = () => {
     namespace: currentProject.metadata.name,
   });
   const { isEasyMode } = useMode();
+  let dspName = '';
+  if (!isEasyMode) {
+    dspName = 'Data Science Project';
+  } else {
+    dspName = 'Projects';
+  }
 
   useCheckLogoutParams();
 
@@ -56,11 +63,21 @@ const ProjectDetails: React.FC = () => {
         ...(!isEasyMode
           ? [{ id: ProjectSectionID.OVERVIEW, title: 'Overview', component: <ProjectOverview /> }]
           : []),
-        {
-          id: ProjectSectionID.WORKBENCHES,
-          title: 'Workbenches',
-          component: <NotebookList />,
-        },
+        ...(!isEasyMode
+          ? [
+              {
+                id: ProjectSectionID.WORKBENCHES,
+                title: 'Workbenches',
+                component: <NotebookList />,
+              },
+            ]
+          : [
+              {
+                id: ProjectSectionID.WORKBENCHES,
+                title: 'Applications',
+                component: <NotebookListEasy />,
+              },
+            ]),
         ...(pipelinesEnabled && !isEasyMode
           ? [
               {
@@ -133,7 +150,7 @@ const ProjectDetails: React.FC = () => {
       description={<div style={{ marginLeft: 40 }}>{description}</div>}
       breadcrumb={
         <Breadcrumb>
-          <BreadcrumbItem render={() => <Link to="/projects">Data Science Projects</Link>} />
+          <BreadcrumbItem render={() => <Link to="/projects">{dspName}</Link>} />
           <BreadcrumbItem isActive>{displayName}</BreadcrumbItem>
         </Breadcrumb>
       }

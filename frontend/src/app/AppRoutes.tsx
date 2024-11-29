@@ -4,6 +4,7 @@ import { InvalidArgoDeploymentAlert } from '~/concepts/pipelines/content/Invalid
 import ApplicationsPage from '~/pages/ApplicationsPage';
 import UnauthorizedError from '~/pages/UnauthorizedError';
 import { useUser } from '~/redux/selectors';
+import { useMode } from '~/redux/selectors/mode';
 import {
   globArtifactsAll,
   globExecutionsAll,
@@ -17,6 +18,7 @@ import ModelRegistrySettingsRoutes from '~/pages/modelRegistrySettings/ModelRegi
 import ConnectionTypeRoutes from '~/pages/connectionTypes/ConnectionTypeRoutes';
 
 const HomePage = React.lazy(() => import('../pages/home/Home'));
+const HomePageEasy = React.lazy(() => import('../pages/home/HomeEasy'));
 
 const InstalledApplications = React.lazy(
   () => import('../pages/enabledApplications/EnabledApplications'),
@@ -71,6 +73,7 @@ const AppRoutes: React.FC = () => {
   const isJupyterEnabled = useCheckJupyterEnabled();
   const isHomeAvailable = useIsAreaAvailable(SupportedArea.HOME).status;
   const isConnectionTypesAvailable = useIsAreaAvailable(SupportedArea.CONNECTION_TYPES).status;
+  const { isEasyMode } = useMode();
 
   if (!isAllowed) {
     return (
@@ -86,7 +89,11 @@ const AppRoutes: React.FC = () => {
       <Routes>
         {isHomeAvailable ? (
           <>
-            <Route path="/" element={<HomePage />} />
+            {isEasyMode ? (
+              <Route path="/" element={<HomePageEasy />} />
+            ) : (
+              <Route path="/" element={<HomePage />} />
+            )}
             <Route path="/enabled" element={<InstalledApplications />} />
           </>
         ) : (

@@ -1,0 +1,161 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: my-ai-studio
+  namespace: redhat-ods-applications
+  labels:
+    app: my-ai-studio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-ai-studio
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: my-ai-studio
+    spec:
+      restartPolicy: Always
+      serviceAccountName: rhods-dashboard
+      imagePullSecrets:
+        - name: addon-managed-odh-pullsecret
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      securityContext: {}
+      containers:
+        - resources:
+            limits:
+              cpu: '1'
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            timeoutSeconds: 15
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: my-ai-studio
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 30
+            timeoutSeconds: 15
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: odh-trusted-ca-cert
+              mountPath: /etc/pki/tls/certs/odh-trusted-ca-bundle.crt
+              subPath: odh-trusted-ca-bundle.crt
+            - name: odh-trusted-ca-cert
+              mountPath: /etc/ssl/certs/odh-trusted-ca-bundle.crt
+              subPath: odh-trusted-ca-bundle.crt
+            - name: odh-ca-cert
+              mountPath: /etc/pki/tls/certs/odh-ca-bundle.crt
+              subPath: odh-ca-bundle.crt
+            - name: odh-ca-cert
+              mountPath: /etc/ssl/certs/odh-ca-bundle.crt
+              subPath: odh-ca-bundle.crt
+          terminationMessagePolicy: File
+          image: 'quay.io/rh-aiservices-bu/my-ai-studio:0.0.1'
+        - resources: {}
+          terminationMessagePath: /dev/termination-log
+          name: oauth-proxy
+          ports:
+            - name: oauth-proxy
+              containerPort: 8443
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: secret-myaistudio-tls
+              mountPath: /etc/tls/private
+            - name: secret-myaistudio-proxy
+              mountPath: /etc/proxy/secrets
+            - name: oauth-config
+              mountPath: /etc/oauth/config
+            - name: oauth-client
+              mountPath: /etc/oauth/client
+            - name: odh-trusted-ca-cert
+              mountPath: /etc/pki/tls/certs/odh-trusted-ca-bundle.crt
+              subPath: odh-trusted-ca-bundle.crt
+            - name: odh-trusted-ca-cert
+              mountPath: /etc/ssl/certs/odh-trusted-ca-bundle.crt
+              subPath: odh-trusted-ca-bundle.crt
+            - name: odh-ca-cert
+              mountPath: /etc/pki/tls/certs/odh-ca-bundle.crt
+              subPath: odh-ca-bundle.crt
+            - name: odh-ca-cert
+              mountPath: /etc/ssl/certs/odh-ca-bundle.crt
+              subPath: odh-ca-bundle.crt
+          terminationMessagePolicy: File
+          image: 'quay.io/openshift/origin-oauth-proxy:4.16'
+          args:
+            - '-https-address=:8443'
+            - '-provider=openshift'
+            - '-upstream=http://localhost:8080'
+            - '-tls-cert=/etc/tls/private/tls.crt'
+            - '-tls-key=/etc/tls/private/tls.key'
+            - '--client-id=my-ai-studio-oauth-client'
+            - '--client-secret-file=/etc/oauth/client/secret'
+            - '--scope=user:full'
+            - '-http-address='
+            - '-email-domain=*'
+            - '-cookie-secret-file=/etc/proxy/secrets/session_secret'
+            - '--cookie-expire=23h0m0s'
+            - '--pass-access-token'
+            - '--openshift-delegate-urls={"/": {"resource": "projects", "verb": "list"}}'
+            - '-skip-auth-regex=^/metrics'
+      serviceAccount: my-ai-studio
+      volumes:
+        - name: secret-myaistudio-tls
+          secret:
+            defaultMode: 420
+            secretName: myaistudio-tls
+        - name: secret-myaistudio-proxy
+          secret:
+            defaultMode: 420
+            secretName: myaistudio-proxy
+        - name: oauth-config
+          secret:
+            secretName: dashboard-oauth-config-generated
+            defaultMode: 420
+        - name: oauth-client
+          secret:
+            secretName: dashboard-oauth-client-generated
+            defaultMode: 420
+        - name: odh-trusted-ca-cert
+          configMap:
+            name: odh-trusted-ca-bundle
+            items:
+              - key: ca-bundle.crt
+                path: odh-trusted-ca-bundle.crt
+            defaultMode: 420
+            optional: true
+        - name: odh-ca-cert
+          configMap:
+            name: odh-trusted-ca-bundle
+            items:
+              - key: odh-ca-bundle.crt
+                path: odh-ca-bundle.crt
+            defaultMode: 420
+            optional: true
+      dnsPolicy: ClusterFirst
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600

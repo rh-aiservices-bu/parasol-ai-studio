@@ -1,0 +1,25 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  annotations:
+    haproxy.router.openshift.io/hsts_header: max-age=31536000;includeSubDomains;preload
+    internal.config.kubernetes.io/previousKinds: Route
+    internal.config.kubernetes.io/previousNames: my-ai-studio
+    internal.config.kubernetes.io/previousNamespaces: default
+    kubernetes.io/tls-acme: 'true'
+    openshift.io/host.generated: 'true'
+  name: my-ai-studio
+  namespace: redhat-ods-applications
+  labels:
+    app: my-ai-studio
+spec:
+  to:
+    kind: Service
+    name: my-ai-studio
+    weight: 100
+  port:
+    targetPort: 8443
+  tls:
+    termination: reencrypt
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None

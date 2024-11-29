@@ -1,0 +1,142 @@
+import * as React from 'react';
+import { Button, ButtonVariant, ToolbarGroup, ToolbarItem } from '@patternfly/react-core';
+import { useNavigate } from 'react-router-dom';
+import { Table } from '~/components/table';
+import DashboardSearchField, { SearchType } from '~/concepts/dashboard/DashboardSearchField';
+import { ProjectKind } from '~/k8sTypes';
+import { getProjectOwner } from '~/concepts/projects/utils';
+import { useAppContext } from '~/app/AppContext';
+import LaunchJupyterButton from '~/pages/projects/screens/projects/LaunchJupyterButton';
+import { ProjectsContext } from '~/concepts/projects/ProjectsContext';
+import ProjectTableRow from '~/pages/projects/screens/projects/ProjectTableRow';
+import { getDisplayNameFromK8sResource } from '~/concepts/k8s/utils';
+import NewProjectButtonEasy from './NewProjectButtonEasy';
+import { columns, subColumns } from './tableDataEasy';
+import DeleteProjectModal from './DeleteProjectModal';
+import ManageProjectModalEasy from './ManageProjectModalEasy';
+
+type ProjectListViewProps = {
+  allowCreate: boolean;
+};
+
+const ProjectListViewEasy: React.FC<ProjectListViewProps> = ({ allowCreate }) => {
+  const { dashboardConfig } = useAppContext();
+  const { projects } = React.useContext(ProjectsContext);
+  const navigate = useNavigate();
+  const [searchType, setSearchType] = React.useState<SearchType>(SearchType.NAME);
+  const [search, setSearch] = React.useState('');
+  const filteredProjects = projects.filter((project) => {
+    if (!search) {
+      return true;
+    }
+
+    switch (searchType) {
+      case SearchType.NAME:
+        return getDisplayNameFromK8sResource(project).toLowerCase().includes(search.toLowerCase());
+      case SearchType.USER:
+        return getProjectOwner(project).toLowerCase().includes(search.toLowerCase());
+      default:
+        return true;
+    }
+  });
+
+  const resetFilters = () => {
+    setSearch('');
+  };
+
+  const [deleteData, setDeleteData] = React.useState<ProjectKind | undefined>();
+  const [editData, setEditData] = React.useState<ProjectKind | undefined>();
+  const [refreshIds, setRefreshIds] = React.useState<string[]>([]);
+
+  return (
+    <>
+      <Table
+        enablePagination
+        variant="compact"
+        defaultSortColumn={3}
+        data={filteredProjects}
+        hasNestedHeader
+        columns={columns}
+        subColumns={subColumns}
+        emptyTableView={
+          <>
+            No projects match your filters.{' '}
+            <Button variant="link" isInline onClick={resetFilters}>
+              Clear filters
+            </Button>
+          </>
+        }
+        data-testid="project-view-table"
+        rowRenderer={(project) => (
+          <ProjectTableRow
+            key={project.metadata.uid}
+            obj={project}
+            isRefreshing={refreshIds.includes(project.metadata.uid || '')}
+            setEditData={(data) => setEditData(data)}
+            setDeleteData={(data) => setDeleteData(data)}
+          />
+        )}
+        toolbarContent={
+          <>
+            <ToolbarGroup>
+              <ToolbarItem>
+                <DashboardSearchField
+                  types={[SearchType.NAME, SearchType.USER]}
+                  searchType={searchType}
+                  searchValue={search}
+                  onSearchTypeChange={(newSearchType: SearchType) => {
+                    setSearchType(newSearchType);
+                  }}
+                  onSearchValueChange={(searchValue: string) => {
+                    setSearch(searchValue);
+                  }}
+                />
+              </ToolbarItem>
+            </ToolbarGroup>
+            <ToolbarGroup align={{ default: 'alignRight' }}>
+              {dashboardConfig.spec.notebookController?.enabled && (
+                <ToolbarItem>
+                  <LaunchJupyterButton variant={ButtonVariant.link} />
+                </ToolbarItem>
+              )}
+              {allowCreate && (
+                <ToolbarItem>
+                  <NewProjectButtonEasy
+                    onProjectCreated={(projectName) => navigate(`/projects/${projectName}`)}
+                  />
+                </ToolbarItem>
+              )}
+            </ToolbarGroup>
+          </>
+        }
+      />
+      <ManageProjectModalEasy
+        open={!!editData}
+        onClose={(newProjectName) => {
+          if (newProjectName) {
+            navigate(`/projects/${newProjectName}`);
+            return;
+          }
+
+          const refreshId = editData?.metadata.uid;
+          if (refreshId) {
+            setRefreshIds((otherIds) => [...otherIds, refreshId]);
+          }
+
+          setEditData(undefined);
+
+          setRefreshIds((ids) => ids.filter((id) => id !== refreshId));
+        }}
+        editProjectData={editData}
+      />
+      <DeleteProjectModal
+        deleteData={deleteData}
+        onClose={() => {
+          setDeleteData(undefined);
+        }}
+      />
+    </>
+  );
+};
+
+export default ProjectListViewEasy;

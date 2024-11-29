@@ -8,11 +8,15 @@ import ProjectModelMetricsConfigurationPage from '~/pages/modelServing/screens/p
 import ProjectModelMetricsPage from '~/pages/modelServing/screens/projects/ProjectModelMetricsPage';
 import ProjectInferenceExplainabilityWrapper from '~/pages/modelServing/screens/projects/ProjectInferenceExplainabilityWrapper';
 import { SupportedArea, useIsAreaAvailable } from '~/concepts/areas';
+import { useMode } from '~/redux/selectors/mode';
 import ProjectDetails from './screens/detail/ProjectDetails';
 import ProjectView from './screens/projects/ProjectView';
+import ProjectViewEasy from './screens/projects/ProjectViewEasy';
 import ProjectDetailsContextProvider from './ProjectDetailsContext';
 import SpawnerPage from './screens/spawner/SpawnerPage';
+import SpawnerPageEasy from './screens/spawner/SpawnerPageEasy';
 import EditSpawnerPage from './screens/spawner/EditSpawnerPage';
+import EditSpawnerPageEasy from './screens/spawner/EditSpawnerPageEasy';
 
 const ProjectViewRoutes: React.FC = () => {
   const [modelMetricsEnabled] = useModelMetricsEnabled();
@@ -20,14 +24,18 @@ const ProjectViewRoutes: React.FC = () => {
   const performanceMetricsAreaAvailable = useIsAreaAvailable(
     SupportedArea.PERFORMANCE_METRICS,
   ).status;
+  const { isEasyMode } = useMode();
 
   return (
     <ProjectsRoutes>
-      <Route path="/" element={<ProjectView />} />
+      {isEasyMode && <Route path="/" element={<ProjectViewEasy />} />}
+      {!isEasyMode && <Route path="/" element={<ProjectView />} />}
       <Route path="/:namespace/*" element={<ProjectDetailsContextProvider />}>
         <Route index element={<ProjectDetails />} />
-        <Route path="spawner" element={<SpawnerPage />} />
-        <Route path="spawner/:notebookName" element={<EditSpawnerPage />} />
+        {isEasyMode && <Route path="spawner" element={<SpawnerPageEasy />} />}
+        {!isEasyMode && <Route path="spawner" element={<SpawnerPage />} />}
+        {isEasyMode && <Route path="spawner/:notebookName" element={<EditSpawnerPageEasy />} />}
+        {!isEasyMode && <Route path="spawner/:notebookName" element={<EditSpawnerPage />} />}
         {modelMetricsEnabled && (
           <>
             <Route path="metrics/model" element={<ProjectInferenceExplainabilityWrapper />}>

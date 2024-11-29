@@ -4,7 +4,7 @@ const initialState: AppState = {
   userLoading: false,
   notifications: [],
   forceComponentsUpdate: 0,
-  isEasyMode: false,
+  isEasyMode: true,
 };
 //eslint-disable-next-line @typescript-eslint/default-param-last
 const appReducer = (state: AppState = initialState, action: GetUserAction): AppState => {

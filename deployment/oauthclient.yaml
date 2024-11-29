@@ -1,0 +1,8 @@
+kind: OAuthClient
+apiVersion: oauth.openshift.io/v1
+metadata:
+  name: my-ai-studio-oauth-client
+secret: # For simplicity you can copy the secret from 'dashboard-oauth-client-generated' 
+redirectURIs:
+  - 'https://my-ai-studio-redhat-ods-applications.apps.dev.rhoai.rh-aiservices-bu.com'
+grantMethod: auto
