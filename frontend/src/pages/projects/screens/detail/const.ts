@@ -3,6 +3,7 @@ import { ProjectSectionID, ProjectSectionTitlesType } from './types';
 export const ProjectSectionTitles: ProjectSectionTitlesType = {
   [ProjectSectionID.OVERVIEW]: 'Overview',
   [ProjectSectionID.WORKBENCHES]: 'Workbenches',
+  [ProjectSectionID.WORKBENCHES_EASY]: 'My Applications',
   [ProjectSectionID.CLUSTER_STORAGES]: 'Cluster storage',
   [ProjectSectionID.DATA_CONNECTIONS]: 'Data connections',
   [ProjectSectionID.MODEL_SERVER]: 'Models and model servers',

@@ -1,0 +1,63 @@
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: my-ai-studio
+  namespace: redhat-ods-applications
+  labels:
+    app: my-ai-studio
+subjects:
+  - kind: ServiceAccount
+    name: my-ai-studio
+    namespace: redhat-ods-applications
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: rhods-dashboard
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: my-ai-studio
+  labels:
+    app: my-ai-studio
+subjects:
+  - kind: ServiceAccount
+    name: my-ai-studio
+    namespace: redhat-ods-applications
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rhods-dashboard
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: my-ai-studio-auth-delegator
+  labels:
+    app: my-ai-studio
+subjects:
+  - kind: ServiceAccount
+    name: my-ai-studio
+    namespace: redhat-ods-applications
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: 'system:auth-delegator'
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: my-ai-studio-monitoring
+  labels:
+    app: my-ai-studio
+subjects:
+  - kind: ServiceAccount
+    name: my-ai-studio
+    namespace: redhat-ods-applications
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-monitoring-view
+
+

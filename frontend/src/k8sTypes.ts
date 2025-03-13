@@ -88,6 +88,7 @@ export type NotebookAnnotations = Partial<{
   'notebooks.opendatahub.io/last-size-selection': string; // the last notebook size they selected
   'opendatahub.io/accelerator-name': string; // the accelerator attached to the notebook
   'opendatahub.io/image-display-name': string; // the display name of the image
+  'opendatahub.io/image-type': string; // the type of image
 }>;
 
 export type DashboardLabels = {

@@ -1,0 +1,7 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: myaistudio
+  namespace: redhat-ods-applications
+  annotations:
+    serviceaccounts.openshift.io/oauth-redirectreference.myaistudio: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"my-ai-studio"}}'
