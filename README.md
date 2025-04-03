@@ -25,7 +25,13 @@ The flow for creating a new application is pretty simple:
 3. Now that the Parasol AI Studio backend has all the needed information (model, endpoint, token,...), it creates a new Workbench of the requested type (AnythingLLM, Docling,...), injecting this information as environment variables. Those variables are used to properly configure the Workbench instance at startup (exact process depends on the type).
 4. The Application (Workbench) can now consume the model from MaaS, using its token to authenticate itself.
 
-## Screenshots
+## The Studio in Action
+
+### Interactive Demo
+
+Follow this link to experience a [fully interactive demo of the Parasol AI Studio](https://interact.redhat.com/share/RK066swfARYNhOwhilvK).
+
+### Screenshots
 
 - Applications launcher, easy-to-use UI
 
