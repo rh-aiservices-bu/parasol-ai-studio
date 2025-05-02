@@ -1,0 +1,162 @@
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  annotations:
+    opendatahub.io/notebook-image-desc: 'AnythingLLM Workbench, providing out of the box chatbot, RAG, agents,...'
+    opendatahub.io/notebook-image-name: AnythingLLM for Parasol AI Studio
+    opendatahub.io/notebook-image-url: 'https://github.com/rh-aiservices-bu/llm-on-openshift/tree/main/llm-clients/anythingllm'
+    opendatahub.io/recommended-accelerators: '[]'
+  name: custom-custom-cai-anything
+  namespace: redhat-ods-applications
+  labels:
+    app.kubernetes.io/part-of: workbenches
+    app.opendatahub.io/workbenches: 'true'
+    component.opendatahub.io/name: notebooks
+    opendatahub.io/component: 'true'
+    opendatahub.io/notebook-image: 'true'
+spec:
+  lookupPolicy:
+    local: true
+  tags:
+    - name: 1.4-1
+      annotations:
+        opendatahub.io/notebook-build-commit: e86ad82
+        opendatahub.io/notebook-python-dependencies: ''
+        opendatahub.io/notebook-software: '[{"name":"AnythingLLM","version":"1.4.0"}]'
+        openshift.io/imported-from: 'quay.io/rh-aiservices-bu/anythingllm-workbench:1.4-1'
+      from:
+        kind: DockerImage
+        name: 'quay.io/rh-aiservices-bu/anythingllm-workbench:1.4-1'
+      generation: 2
+      importPolicy:
+        importMode: Legacy
+      referencePolicy:
+        type: Source
+    - name: 1.7.4
+      annotations:
+        opendatahub.io/notebook-build-commit: 96cc7585df36
+        opendatahub.io/notebook-python-dependencies: ''
+        opendatahub.io/notebook-software: '[{"name":"AnythingLLM","version":"1.7.4"}]'
+        openshift.io/imported-from: 'quay.io/rh-aiservices-bu/anythingllm-workbench:1.7.4-1'
+      from:
+        kind: DockerImage
+        name: 'quay.io/rh-aiservices-bu/anythingllm-workbench:1.7.4-1'
+      generation: 8
+      importPolicy:
+        importMode: Legacy
+      referencePolicy:
+        type: Source
+    - name: 1.7.5
+      annotations:
+        opendatahub.io/notebook-build-commit: 96cc7585df36
+        opendatahub.io/notebook-python-dependencies: ''
+        opendatahub.io/notebook-software: '[{"name":"AnythingLLM","version":"1.7.5"}]'
+        openshift.io/imported-from: 'quay.io/rh-aiservices-bu/anythingllm-workbench:1.7.5'
+      from:
+        kind: DockerImage
+        name: 'quay.io/rh-aiservices-bu/anythingllm-workbench:1.7.5'
+      generation: 12
+      importPolicy:
+        importMode: Legacy
+      referencePolicy:
+        type: Source
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  annotations:
+    opendatahub.io/notebook-image-creator: gmoutier@redhat.com
+    opendatahub.io/notebook-image-desc: ''
+    opendatahub.io/notebook-image-name: Code Server for Parasol AI Studio
+    opendatahub.io/notebook-image-url: 'quay.io/modh/codeserver@sha256:b0544754e3bb77f5445b30ec503e91e454310a1a5fcb44866c501bb5cff955c1'
+    opendatahub.io/recommended-accelerators: '[]'
+  name: custom-custom-cai-code
+  namespace: redhat-ods-applications
+  labels:
+    app.kubernetes.io/created-by: byon
+    opendatahub.io/dashboard: 'true'
+    opendatahub.io/notebook-image: 'true'
+spec:
+  lookupPolicy:
+    local: true
+  tags:
+    - name: 0.0.1
+      annotations:
+        opendatahub.io/notebook-python-dependencies: '[]'
+        opendatahub.io/notebook-software: '[]'
+        openshift.io/imported-from: 'quay.io/rh-aiservices-bu/parasol-code-server:0.0.1'
+      from:
+        kind: DockerImage
+        name: 'quay.io/rh-aiservices-bu/parasol-code-server:0.0.1'
+      generation: 4
+      importPolicy:
+        importMode: Legacy
+      referencePolicy:
+        type: Source
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  annotations:
+    opendatahub.io/notebook-image-creator: gmoutier@redhat.com
+    opendatahub.io/notebook-image-desc: ''
+    opendatahub.io/notebook-image-name: Docling Client for Parasol AI Studio
+    opendatahub.io/notebook-image-url: quay.io/rh-aiservices-bu/docling-workbench
+    opendatahub.io/recommended-accelerators: '[]'
+  name: custom-custom-cai-docling
+  namespace: redhat-ods-applications
+  labels:
+    app.kubernetes.io/created-by: byon
+    opendatahub.io/dashboard: 'true'
+    opendatahub.io/notebook-image: 'true'
+spec:
+  lookupPolicy:
+    local: true
+  tags:
+    - name: 0.0.6
+      annotations:
+        opendatahub.io/notebook-python-dependencies: '[]'
+        opendatahub.io/notebook-software: '[{"name":"Docling client","version":"0.0.6"}]'
+        openshift.io/imported-from: 'quay.io/rh-aiservices-bu/docling-workbench:0.0.6'
+      from:
+        kind: DockerImage
+        name: 'quay.io/rh-aiservices-bu/docling-workbench:0.0.6'
+      generation: 11
+      importPolicy:
+        importMode: Legacy
+      referencePolicy:
+        type: Source
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  annotations:
+    opendatahub.io/notebook-image-creator: gmoutier@redhat.com
+    opendatahub.io/notebook-image-desc: ''
+    opendatahub.io/notebook-image-name: StableDiffusion Studio for Parasol AI Studio
+    opendatahub.io/notebook-image-url: 'quay.io/rh-aiservices-bu/sdxl-ministudio:0.1.1'
+    opendatahub.io/recommended-accelerators: '[]'
+  name: custom-custom-cai-sdxl
+  namespace: redhat-ods-applications
+  labels:
+    app.kubernetes.io/created-by: byon
+    opendatahub.io/dashboard: 'true'
+    opendatahub.io/notebook-image: 'true'
+spec:
+  lookupPolicy:
+    local: true
+  tags:
+    - name: 0.2.6
+      annotations:
+        opendatahub.io/notebook-python-dependencies: '[]'
+        opendatahub.io/notebook-software: '[{"name":"SDXL Studio","version":"0.2.6"}]'
+        openshift.io/imported-from: 'quay.io/rh-aiservices-bu/sdxl-ministudio:0.2.6'
+      from:
+        kind: DockerImage
+        name: 'quay.io/rh-aiservices-bu/sdxl-ministudio:0.2.6'
+      generation: 12
+      importPolicy:
+        importMode: Legacy
+      referencePolicy:
+        type: Source

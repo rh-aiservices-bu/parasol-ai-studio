@@ -51,6 +51,21 @@ spec:
             periodSeconds: 30
             successThreshold: 1
             failureThreshold: 3
+          env:
+            - name: MAAS_API_URL
+              value: 'replace-me'
+            - name: MAAS_API_KEY
+              value: replace-me
+            - name: MAAS_GRANITE_PLAN_ID
+              value: 'replace-me'
+            - name: MAAS_SDXL_PLAN_ID
+              value: 'replace-me'
+            - name: MAAS_DOCLING_PLAN_ID
+              value: 'replace-me'
+            - name: MAAS_GUARD_PLAN_ID
+              value: 'replace-me'
+            - name: MAAS_SAFETY_PLAN_ID
+              value: 'replace-me'
           ports:
             - containerPort: 8080
               protocol: TCP
