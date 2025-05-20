@@ -53,19 +53,45 @@ spec:
             failureThreshold: 3
           env:
             - name: MAAS_API_URL
-              value: 'replace-me'
+              valueFrom:
+                secretKeyRef:
+                  name: my-ai-studio-secret
+                  key: MAAS_API_URL
             - name: MAAS_API_KEY
-              value: replace-me
-            - name: MAAS_GRANITE_PLAN_ID
-              value: 'replace-me'
+              valueFrom:
+                secretKeyRef:
+                  name: my-ai-studio-secret
+                  key: MAAS_API_KEY
+            - name: MAAS_ANYLLM_PLAN_ID
+              valueFrom:
+                secretKeyRef:
+                  name: my-ai-studio-secret
+                  key: MAAS_ANYLLM_PLAN_ID
+            - name: MAAS_CODE_PLAN_ID
+              valueFrom:
+                secretKeyRef:
+                  name: my-ai-studio-secret
+                  key: MAAS_CODE_PLAN_ID
             - name: MAAS_SDXL_PLAN_ID
-              value: 'replace-me'
+              valueFrom:
+                secretKeyRef:
+                  name: my-ai-studio-secret
+                  key: MAAS_SDXL_PLAN_ID
             - name: MAAS_DOCLING_PLAN_ID
-              value: 'replace-me'
+              valueFrom:
+                secretKeyRef:
+                  name: my-ai-studio-secret
+                  key: MAAS_DOCLING_PLAN_ID
             - name: MAAS_GUARD_PLAN_ID
-              value: 'replace-me'
+              valueFrom:
+                secretKeyRef:
+                  name: my-ai-studio-secret
+                  key: MAAS_GUARD_PLAN_ID
             - name: MAAS_SAFETY_PLAN_ID
-              value: 'replace-me'
+              valueFrom:
+                secretKeyRef:
+                  name: my-ai-studio-secret
+                  key: MAAS_SAFETY_PLAN_ID
           ports:
             - containerPort: 8080
               protocol: TCP

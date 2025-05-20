@@ -5,6 +5,7 @@ import {
   checkOrCreateMaasApplication,
   checkOrCreateMaasUser,
   deleteMaasApplication,
+  getMaasApplicationPlanEndpoint,
   helloMaas,
 } from './maas-utils';
 
@@ -21,6 +22,10 @@ interface CheckMaasApplicationBody {
 interface DeleteMaasApplicationBody {
   user_name: string;
   app_name: string;
+}
+
+interface CheckMaasGatewayConfigParams {
+  service_name: string;
 }
 
 export default async (fastify: KubeFastifyInstance): Promise<void> => {
@@ -104,4 +109,18 @@ export default async (fastify: KubeFastifyInstance): Promise<void> => {
           }),
     ),
   );
+
+  // Route to get proxy configuration
+  fastify.get(
+    '/get-application-plan-endpoint/:service_name',
+    secureRoute(fastify)(
+      async (request: FastifyRequest<{ Params: CheckMaasGatewayConfigParams }>, reply: FastifyReply) =>
+        getMaasApplicationPlanEndpoint(fastify, request.params.service_name)
+          .then((res) => reply.send(res))
+          .catch((res) => {
+            reply.send(res);
+          }),
+    ),
+  );
+  
 };

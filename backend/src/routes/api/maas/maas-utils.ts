@@ -4,7 +4,8 @@ import {
   MAAS_API_KEY,
   MAAS_API_URL,
   MAAS_DOCLING_PLAN_ID,
-  MAAS_GRANITE_PLAN_ID,
+  MAAS_ANYLLM_PLAN_ID,
+  MAAS_CODE_PLAN_ID,
   MAAS_SDXL_PLAN_ID,
   MAAS_GUARD_PLAN_ID,
   MAAS_SAFETY_PLAN_ID,
@@ -16,8 +17,14 @@ interface Application {
   user_key: string;
 }
 
+interface ApplicationPlan {
+  id: string;
+  service_id: string;
+}
+
 const SERVICE_PLAN_MAP = {
-  granite: MAAS_GRANITE_PLAN_ID,
+  anyllm: MAAS_ANYLLM_PLAN_ID,
+  code: MAAS_CODE_PLAN_ID,
   sdxl: MAAS_SDXL_PLAN_ID,
   docling: MAAS_DOCLING_PLAN_ID,
   guard: MAAS_GUARD_PLAN_ID,
@@ -296,6 +303,96 @@ export const deleteMaasApplication = async (
   } catch (e) {
     console.error(e);
     fastify.log.debug('User ID:', user_id);
+    throw e; // Re-throw the error to be handled by the caller
+  }
+};
+
+
+/**
+ * Get the gateway endpoint for the application plan
+ *
+ * @param fastify - The Fastify instance.
+ * @param service_name - The name of the service.
+ * @returns A promise that resolves to an object containing a message indicating the result.
+ * @throws Will throw an error if the fetch request fails.
+ */
+export const getMaasApplicationPlanEndpoint = async (
+  fastify: KubeFastifyInstance,
+  service_name: string,
+): Promise<{ message: string }> => {
+  // Check if user exists
+  const planId = SERVICE_PLAN_MAP[service_name as keyof typeof SERVICE_PLAN_MAP];
+
+  fastify.log.info(`Retrieving of gateway config for ${service_name} (${planId})`);
+
+  const url = new URL(MAAS_API_URL + '/admin/api/application_plans.xml');
+  const urlParams = new URLSearchParams();
+  urlParams.append('access_token', MAAS_API_KEY);
+
+  try {
+    const response = await fetch(`${url}?${urlParams}`, {
+      method: 'GET',
+      headers: {
+        Accept: '*/*',
+      },
+    });
+
+    if (response.ok) {
+      const parser = new XMLParser();
+      var data = await response.text();
+      let jsonObj = parser.parse(data);
+
+      // Find if application exists
+      let matchingPlan: ApplicationPlan | undefined;
+
+      let plans = [];
+      // Find all application blocks
+      if (jsonObj.plans !== '') {
+        plans = Array.isArray(jsonObj?.plans?.plan)
+          ? jsonObj.plans.plan
+          : [jsonObj.plans.plan];
+      }
+      
+      if (plans.length > 0) {
+        matchingPlan = plans.find((plan: ApplicationPlan) => plan.id == planId);
+      }
+
+      if (!matchingPlan) {
+        return { message: 'ApplicationPlan not found' };
+      } else {
+        const gatewayConfigUrl = new URL(MAAS_API_URL + '/admin/api/services/' + matchingPlan.service_id + '/proxy.xml');
+        const gatewayConfigUrlParams = new URLSearchParams();
+        gatewayConfigUrlParams.append('access_token', MAAS_API_KEY);
+
+        try {
+          const gatewayConfigResponse = await fetch(`${gatewayConfigUrl}?${gatewayConfigUrlParams}`, {
+            method: 'GET',
+            headers: {
+              Accept: '*/*',
+            },
+          });
+
+          if (gatewayConfigResponse.ok) {
+            let endpoint = '';
+            data = await gatewayConfigResponse.text();
+            jsonObj = parser.parse(data);
+
+            fastify.log.info(jsonObj);
+
+            endpoint = jsonObj?.proxy?.endpoint;
+
+            return { message: endpoint };
+          }
+        } catch (e) {
+          console.error(e);
+          fastify.log.debug('Service Name:', service_name);
+          throw e; // Re-throw the error to be handled by the caller
+        }
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    fastify.log.debug('Service Name:', service_name);
     throw e; // Re-throw the error to be handled by the caller
   }
 };

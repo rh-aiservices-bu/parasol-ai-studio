@@ -149,7 +149,8 @@ export const MODEL_REGISTRY_NAMESPACE = 'odh-model-registries';
 
 export const MAAS_API_URL = process.env.MAAS_API_URL;
 export const MAAS_API_KEY = process.env.MAAS_API_KEY;
-export const MAAS_GRANITE_PLAN_ID = process.env.MAAS_GRANITE_PLAN_ID;
+export const MAAS_ANYLLM_PLAN_ID = process.env.MAAS_ANYLLM_PLAN_ID;
+export const MAAS_CODE_PLAN_ID = process.env.MAAS_CODE_PLAN_ID;
 export const MAAS_SDXL_PLAN_ID = process.env.MAAS_SDXL_PLAN_ID;
 export const MAAS_DOCLING_PLAN_ID = process.env.MAAS_DOCLING_PLAN_ID;
 export const MAAS_GUARD_PLAN_ID = process.env.MAAS_GUARD_PLAN_ID;

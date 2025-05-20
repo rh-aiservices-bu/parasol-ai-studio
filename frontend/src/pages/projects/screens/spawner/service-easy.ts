@@ -26,15 +26,15 @@ import {
 } from '~/pages/projects/types';
 import { Volume, VolumeMount } from '~/types';
 // eslint-disable-next-line no-restricted-imports
-import { proxyCREATE } from '~/api/proxyUtils';
+import { proxyCREATE, proxyGET } from '~/api/proxyUtils';
 import { DEV_MODE } from '~/utilities/const';
 import { fetchNotebookEnvVariables } from './environmentVariables/useNotebookEnvVariables';
 import { getVolumesByStorageData } from './spawnerUtils';
 
 const modelImageMap: { [key: string]: string } = {
-  'custom-custom-cai-anything': 'granite',
+  'custom-custom-cai-anything': 'anyllm',
   'custom-custom-cai-sdxl': 'sdxl',
-  'custom-custom-cai-code': 'granite',
+  'custom-custom-cai-code': 'code',
   'custom-custom-cai-docling': 'docling',
 };
 
@@ -312,6 +312,17 @@ const fetchApiKey = async (
   return response.message;
 };
 
+const fetchApiEndpoint = async (
+  serviceName: string,
+): Promise<string> => {
+  let host = '';
+  if (!DEV_MODE) {
+    host = `${window.location.protocol}//${window.location.hostname}`;
+  }
+  const response: MaasResponse = await proxyGET(host, `/api/maas/get-application-plan-endpoint/` + serviceName);
+  return response.message;
+};
+
 export const createApiKeyForNotebook = async (
   userName: string,
   projectName: string,
@@ -321,11 +332,13 @@ export const createApiKeyForNotebook = async (
   try {
     let newEnvVar: EnvVariable;
     let apiKey = '';
+    let endpoint = '';
     let apiKeyGuard = '';
     let apiKeySafety = '';
     switch (imageName) {
       case 'custom-custom-cai-anything':
         apiKey = await fetchApiKey(userName, projectName, notebookName, modelImageMap[imageName]);
+        endpoint = await fetchApiEndpoint(modelImageMap[imageName]);
         newEnvVar = {
           type: EnvironmentVariableType.SECRET,
           values: {
@@ -339,8 +352,7 @@ export const createApiKeyForNotebook = async (
               },
               {
                 key: 'GENERIC_OPEN_AI_BASE_PATH',
-                value:
-                  'https://granite-3-8b-instruct-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1',
+                value: endpoint + '/v1',
               },
               { key: 'GENERIC_OPEN_AI_MAX_TOKENS', value: '2048' },
               { key: 'GENERIC_OPEN_AI_MODEL_PREF', value: 'granite-3-8b-instruct' },
@@ -353,6 +365,7 @@ export const createApiKeyForNotebook = async (
         break;
       case 'custom-custom-cai-code':
         apiKey = await fetchApiKey(userName, projectName, notebookName, modelImageMap[imageName]);
+        endpoint = await fetchApiEndpoint(modelImageMap[imageName]);
         newEnvVar = {
           type: EnvironmentVariableType.SECRET,
           values: {
@@ -360,17 +373,17 @@ export const createApiKeyForNotebook = async (
             data: [
               {
                 key: 'MODEL_ENDPOINT_URL',
-                value:
-                  'https://granite-3-8b-instruct-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1',
+                value: endpoint + '/v1',
               },
               { key: 'API_KEY', value: apiKey },
-              { key: 'MODEL_NAME', value: 'granite-3-8b-instruct' },
+              { key: 'MODEL_NAME', value: 'granite-8b-code-instruct-128k' },
             ],
           },
         };
         break;
       case 'custom-custom-cai-sdxl':
         apiKey = await fetchApiKey(userName, projectName, notebookName, modelImageMap[imageName]);
+        endpoint = await fetchApiEndpoint(modelImageMap[imageName]);
         apiKeyGuard = await fetchApiKey(userName, projectName, `${notebookName}-guard`, 'guard');
         apiKeySafety = await fetchApiKey(userName, projectName, `${notebookName}-safety`, 'safety');
         newEnvVar = {
@@ -381,8 +394,7 @@ export const createApiKeyForNotebook = async (
               { key: 'PARASOL_MODE', value: 'true' },
               {
                 key: 'SDXL_ENDPOINT_URL',
-                value:
-                  'https://sdxl-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443',
+                value: endpoint,
               },
               { key: 'SDXL_ENDPOINT_TOKEN', value: apiKey },
               {
@@ -409,6 +421,7 @@ export const createApiKeyForNotebook = async (
         break;
       case 'custom-custom-cai-docling':
         apiKey = await fetchApiKey(userName, projectName, notebookName, modelImageMap[imageName]);
+        endpoint = await fetchApiEndpoint(modelImageMap[imageName]);
         newEnvVar = {
           type: EnvironmentVariableType.SECRET,
           values: {
@@ -416,8 +429,7 @@ export const createApiKeyForNotebook = async (
             data: [
               {
                 key: 'HOST',
-                value:
-                  'https://docling-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443',
+                value: endpoint,
               },
               { key: 'AUTH_TOKEN', value: apiKey },
             ],
