@@ -5,7 +5,11 @@ import {
   checkOrCreateMaasApplication,
   checkOrCreateMaasUser,
   deleteMaasApplication,
+  getMaasApplicationPlanEndpoint,
+  getVectorDBConfiguration,
   helloMaas,
+  isGuardEnabled,
+  isSafetyEnabled,
 } from './maas-utils';
 
 interface CheckMaasUserParams {
@@ -21,6 +25,10 @@ interface CheckMaasApplicationBody {
 interface DeleteMaasApplicationBody {
   user_name: string;
   app_name: string;
+}
+
+interface CheckMaasGatewayConfigParams {
+  service_name: string;
 }
 
 export default async (fastify: KubeFastifyInstance): Promise<void> => {
@@ -104,4 +112,57 @@ export default async (fastify: KubeFastifyInstance): Promise<void> => {
           }),
     ),
   );
+
+  // Route to get proxy configuration
+  fastify.get(
+    '/get-application-plan-endpoint/:service_name',
+    secureRoute(fastify)(
+      async (request: FastifyRequest<{ Params: CheckMaasGatewayConfigParams }>, reply: FastifyReply) =>
+        getMaasApplicationPlanEndpoint(fastify, request.params.service_name)
+          .then((res) => reply.send(res))
+          .catch((res) => {
+            reply.send(res);
+          }),
+    ),
+  );
+
+  // Route to get Vector DB configuration
+  fastify.get(
+    '/get-vectordb-configuration',
+    secureRoute(fastify)(
+      async (request: FastifyRequest<{ Params: CheckMaasGatewayConfigParams }>, reply: FastifyReply) =>
+        getVectorDBConfiguration(fastify)
+          .then((res) => reply.send(res))
+          .catch((res) => {
+            reply.send(res);
+          }),
+    ),
+  );
+
+  // Route to is guard enabled
+  fastify.get(
+    '/is-guard-enabled',
+    secureRoute(fastify)(
+      async (request: FastifyRequest<{ Params: CheckMaasGatewayConfigParams }>, reply: FastifyReply) =>
+        isGuardEnabled(fastify)
+          .then((res) => reply.send(res))
+          .catch((res) => {
+            reply.send(res);
+          }),
+    ),
+  );
+
+  // Route to is safety enabled
+  fastify.get(
+    '/is-safety-enabled',
+    secureRoute(fastify)(
+      async (request: FastifyRequest<{ Params: CheckMaasGatewayConfigParams }>, reply: FastifyReply) =>
+        isSafetyEnabled(fastify)
+          .then((res) => reply.send(res))
+          .catch((res) => {
+            reply.send(res);
+          }),
+    ),
+  );
+  
 };

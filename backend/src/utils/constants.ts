@@ -149,8 +149,8 @@ export const MODEL_REGISTRY_NAMESPACE = 'odh-model-registries';
 
 export const MAAS_API_URL = process.env.MAAS_API_URL;
 export const MAAS_API_KEY = process.env.MAAS_API_KEY;
-export const MAAS_GRANITE_PLAN_ID = process.env.MAAS_GRANITE_PLAN_ID;
-export const MAAS_SDXL_PLAN_ID = process.env.MAAS_SDXL_PLAN_ID;
-export const MAAS_DOCLING_PLAN_ID = process.env.MAAS_DOCLING_PLAN_ID;
-export const MAAS_GUARD_PLAN_ID = process.env.MAAS_GUARD_PLAN_ID;
-export const MAAS_SAFETY_PLAN_ID = process.env.MAAS_SAFETY_PLAN_ID;
+export const VECTOR_DB = process.env.VECTOR_DB;
+export const WEAVIATE_ENDPOINT = process.env.WEAVIATE_ENDPOINT;
+export const QDRANT_ENDPOINT = process.env.QDRANT_ENDPOINT;
+export const GUARD_ENABLED = process.env.GUARD_ENABLED;
+export const SAFETY_ENABLED = process.env.SAFETY_ENABLED;

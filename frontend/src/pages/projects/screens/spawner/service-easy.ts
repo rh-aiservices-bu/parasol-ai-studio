@@ -26,20 +26,25 @@ import {
 } from '~/pages/projects/types';
 import { Volume, VolumeMount } from '~/types';
 // eslint-disable-next-line no-restricted-imports
-import { proxyCREATE } from '~/api/proxyUtils';
+import { proxyCREATE, proxyGET } from '~/api/proxyUtils';
 import { DEV_MODE } from '~/utilities/const';
 import { fetchNotebookEnvVariables } from './environmentVariables/useNotebookEnvVariables';
 import { getVolumesByStorageData } from './spawnerUtils';
 
 const modelImageMap: { [key: string]: string } = {
-  'custom-custom-cai-anything': 'granite',
+  'custom-custom-cai-anything': 'anythingllm',
   'custom-custom-cai-sdxl': 'sdxl',
-  'custom-custom-cai-code': 'granite',
+  'custom-custom-cai-code': 'code',
   'custom-custom-cai-docling': 'docling',
 };
 
 interface MaasResponse {
   message: string;
+}
+
+interface VectorDBConfiguration {
+  VECTOR_DB: string,
+  WEAVIATE_ENDPOINT?: string
 }
 
 export const createPvcDataForNotebook = async (
@@ -312,6 +317,67 @@ const fetchApiKey = async (
   return response.message;
 };
 
+const fetchApiEndpoint = async (
+  serviceName: string,
+): Promise<string> => {
+  let host = '';
+  if (!DEV_MODE) {
+    host = `${window.location.protocol}//${window.location.hostname}`;
+  }
+  const response: MaasResponse = await proxyGET(host, `/api/maas/get-application-plan-endpoint/` + serviceName);
+  return response.message;
+};
+
+const fetchModelNameBearerAuth = async (
+  endpoint: string,
+  apiKey: String
+): Promise<string> => {
+  const response = await fetch(endpoint + "/v1/models", { headers: {"Authorization": "Bearer "+apiKey}});
+  const models = await response.json();
+  
+  return models.data[0].id;
+};
+
+const fetchModelNameUserKey = async (
+  endpoint: string,
+  apiKey: String
+): Promise<string> => {
+  const response = await fetch(endpoint + "/v1/models?user_key=" + apiKey);
+  const models = await response.json();
+  
+  return models.data[0].id;
+};
+
+const fetchVectorDBConfiguration = async (
+): Promise<string> => {
+  let host = '';
+  if (!DEV_MODE) {
+    host = `${window.location.protocol}//${window.location.hostname}`;
+  }
+  const response: MaasResponse = await proxyGET(host, `/api/maas/get-vectordb-configuration`);
+  return response.message;
+};
+
+const fetchGuardEnabled = async (
+): Promise<string> => {
+  let host = '';
+  if (!DEV_MODE) {
+    host = `${window.location.protocol}//${window.location.hostname}`;
+  }
+  const response: MaasResponse = await proxyGET(host, `/api/maas/is-guard-enabled`);
+  return response.message;
+};
+
+const fetchSafetyEnabled = async (
+): Promise<string> => {
+  let host = '';
+  if (!DEV_MODE) {
+    host = `${window.location.protocol}//${window.location.hostname}`;
+  }
+  const response: MaasResponse = await proxyGET(host, `/api/maas/is-safety-enabled`);
+  return response.message;
+};
+
 export const createApiKeyForNotebook = async (
   userName: string,
   projectName: string,
@@ -321,11 +387,14 @@ export const createApiKeyForNotebook = async (
   try {
     let newEnvVar: EnvVariable;
     let apiKey = '';
-    let apiKeyGuard = '';
-    let apiKeySafety = '';
+    let endpoint = '';
+    let modelName = '';
+
     switch (imageName) {
       case 'custom-custom-cai-anything':
         apiKey = await fetchApiKey(userName, projectName, notebookName, modelImageMap[imageName]);
+        endpoint = await fetchApiEndpoint(modelImageMap[imageName]);
+        modelName = await fetchModelNameBearerAuth(endpoint, apiKey);
         newEnvVar = {
           type: EnvironmentVariableType.SECRET,
           values: {
@@ -333,92 +402,109 @@ export const createApiKeyForNotebook = async (
             data: [
               { key: 'DISABLE_TELEMETRY', value: 'true' },
               { key: 'EMBEDDING_ENGINE', value: 'native' },
-              {
-                key: 'GENERIC_OPEN_AI_API_KEY',
-                value: apiKey,
-              },
-              {
-                key: 'GENERIC_OPEN_AI_BASE_PATH',
-                value:
-                  'https://granite-3-8b-instruct-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1',
-              },
+              { key: 'GENERIC_OPEN_AI_API_KEY', value: apiKey },
+              { key: 'GENERIC_OPEN_AI_BASE_PATH', value: endpoint + '/v1' },
               { key: 'GENERIC_OPEN_AI_MAX_TOKENS', value: '2048' },
-              { key: 'GENERIC_OPEN_AI_MODEL_PREF', value: 'granite-3-8b-instruct' },
+              { key: 'GENERIC_OPEN_AI_MODEL_PREF', value: modelName },
               { key: 'LLM_PROVIDER', value: 'generic-openai' },
               { key: 'GENERIC_OPEN_AI_MODEL_TOKEN_LIMIT', value: '4096' },
-              { key: 'VECTOR_DB', value: 'lancedb' },
             ],
           },
         };
+
+        var vectorDB: VectorDBConfiguration = JSON.parse(await fetchVectorDBConfiguration());
+
+        console.info("Configuring VectorDB (" + vectorDB.VECTOR_DB + ")");
+
+        if (vectorDB.VECTOR_DB == "weaviate") {
+          const weaviateEndpoint = vectorDB.WEAVIATE_ENDPOINT!;
+
+          console.info("Detected Weaviate as VectorDB (" + weaviateEndpoint + ")");
+
+          newEnvVar.values!.data.push({ key: 'WEAVIATE_ENDPOINT', value: weaviateEndpoint });  
+        }
+        newEnvVar.values!.data.push({ key: 'VECTOR_DB', value: vectorDB.VECTOR_DB });
+
         break;
       case 'custom-custom-cai-code':
         apiKey = await fetchApiKey(userName, projectName, notebookName, modelImageMap[imageName]);
+        endpoint = await fetchApiEndpoint(modelImageMap[imageName]);
+        modelName = await fetchModelNameBearerAuth(endpoint, apiKey);
+
         newEnvVar = {
           type: EnvironmentVariableType.SECRET,
           values: {
             category: SecretCategory.GENERIC,
             data: [
-              {
-                key: 'MODEL_ENDPOINT_URL',
-                value:
-                  'https://granite-3-8b-instruct-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1',
-              },
+              { key: 'MODEL_ENDPOINT_URL', value: endpoint + '/v1' },
               { key: 'API_KEY', value: apiKey },
-              { key: 'MODEL_NAME', value: 'granite-3-8b-instruct' },
+              { key: 'MODEL_NAME', value: modelName },
             ],
           },
         };
         break;
       case 'custom-custom-cai-sdxl':
+        let apiKeyGuard = '';
+        let apiKeySafety = '';
+        let guardEnabled = 'false';
+        let safetyEnabled = 'false';
+        let guardEndpoint = '';
+        let safetyEndpoint = '';
+        let modelNameGuard = '';
+        let modelNameSafety = '';
+
         apiKey = await fetchApiKey(userName, projectName, notebookName, modelImageMap[imageName]);
-        apiKeyGuard = await fetchApiKey(userName, projectName, `${notebookName}-guard`, 'guard');
-        apiKeySafety = await fetchApiKey(userName, projectName, `${notebookName}-safety`, 'safety');
+        endpoint = await fetchApiEndpoint(modelImageMap[imageName]);
+
+        guardEnabled = await fetchGuardEnabled();
+        console.info("Guard enabled: " + guardEnabled);
+
+        if (guardEnabled == "true") {
+          apiKeyGuard = await fetchApiKey(userName, projectName, `${notebookName}-guard`, 'guard');
+          guardEndpoint = await fetchApiEndpoint('guard');
+          modelNameGuard = await fetchModelNameUserKey(guardEndpoint, apiKeySafety);
+        }
+
+        safetyEnabled = await fetchSafetyEnabled();
+        console.info("Safety enabled: " + safetyEnabled);
+
+        if (safetyEnabled == "true") {
+          apiKeySafety = await fetchApiKey(userName, projectName, `${notebookName}-safety`, 'safety');
+          safetyEndpoint = await fetchApiEndpoint('safety');
+          modelNameSafety = await fetchModelNameUserKey(safetyEndpoint, apiKeySafety);
+        }
+
         newEnvVar = {
           type: EnvironmentVariableType.SECRET,
           values: {
             category: SecretCategory.GENERIC,
             data: [
               { key: 'PARASOL_MODE', value: 'true' },
-              {
-                key: 'SDXL_ENDPOINT_URL',
-                value:
-                  'https://sdxl-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443',
-              },
+              { key: 'SDXL_ENDPOINT_URL', value: endpoint },
               { key: 'SDXL_ENDPOINT_TOKEN', value: apiKey },
-              {
-                key: 'GUARD_ENDPOINT_URL',
-                value:
-                  'https://granite3-guardian-2b-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1',
-              },
+              { key: 'GUARD_ENDPOINT_URL', value: guardEndpoint + '/v1' },
               { key: 'GUARD_ENDPOINT_TOKEN', value: apiKeyGuard },
-              { key: 'GUARD_ENABLED', value: 'true' },
-              { key: 'GUARD_MODEL', value: 'granite3-guardian-2b' },
+              { key: 'GUARD_ENABLED', value: guardEnabled },
+              { key: 'GUARD_MODEL', value: modelNameGuard },
               { key: 'GUARD_TEMP', value: '0.7' },
               { key: 'GUARD_PROMPT_PREFIX', value: 'Draw a picture of' },
-              { key: 'SAFETY_CHECK_ENABLED', value: 'true' },
-              {
-                key: 'SAFETY_CHECK_ENDPOINT_URL',
-                value:
-                  'https://safety-checker-maas-apicast-staging.apps.prod.rhoai.rh-aiservices-bu.com',
-              },
+              { key: 'SAFETY_CHECK_ENABLED', value: safetyEnabled },
+              { key: 'SAFETY_CHECK_ENDPOINT_URL', value: safetyEndpoint },
               { key: 'SAFETY_CHECK_ENDPOINT_TOKEN', value: apiKeySafety },
-              { key: 'SAFETY_CHECK_MODEL', value: 'safety-checker' },
+              { key: 'SAFETY_CHECK_MODEL', value: modelNameSafety }
             ],
           },
         };
         break;
       case 'custom-custom-cai-docling':
         apiKey = await fetchApiKey(userName, projectName, notebookName, modelImageMap[imageName]);
+        endpoint = await fetchApiEndpoint(modelImageMap[imageName]);
         newEnvVar = {
           type: EnvironmentVariableType.SECRET,
           values: {
             category: SecretCategory.GENERIC,
             data: [
-              {
-                key: 'HOST',
-                value:
-                  'https://docling-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443',
-              },
+              { key: 'HOST', value: endpoint },
               { key: 'AUTH_TOKEN', value: apiKey },
             ],
           },
