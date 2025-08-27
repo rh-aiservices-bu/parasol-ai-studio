@@ -340,7 +340,7 @@ export const createApiKeyForNotebook = async (
               {
                 key: 'GENERIC_OPEN_AI_BASE_PATH',
                 value:
-                  'https://granite-3-8b-instruct-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1',
+                  'https://granite-3-3-8b-instruct-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1',
               },
               { key: 'GENERIC_OPEN_AI_MAX_TOKENS', value: '2048' },
               { key: 'GENERIC_OPEN_AI_MODEL_PREF', value: 'granite-3-8b-instruct' },
@@ -361,7 +361,7 @@ export const createApiKeyForNotebook = async (
               {
                 key: 'MODEL_ENDPOINT_URL',
                 value:
-                  'https://granite-3-8b-instruct-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1',
+                  'https://granite-3-3-8b-instruct-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1',
               },
               { key: 'API_KEY', value: apiKey },
               { key: 'MODEL_NAME', value: 'granite-3-8b-instruct' },
