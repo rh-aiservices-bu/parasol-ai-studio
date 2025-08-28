@@ -343,7 +343,7 @@ export const createApiKeyForNotebook = async (
                   'https://granite-3-3-8b-instruct-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1',
               },
               { key: 'GENERIC_OPEN_AI_MAX_TOKENS', value: '2048' },
-              { key: 'GENERIC_OPEN_AI_MODEL_PREF', value: 'granite-3-8b-instruct' },
+              { key: 'GENERIC_OPEN_AI_MODEL_PREF', value: 'granite-3-3-8b-instruct' },
               { key: 'LLM_PROVIDER', value: 'generic-openai' },
               { key: 'GENERIC_OPEN_AI_MODEL_TOKEN_LIMIT', value: '4096' },
               { key: 'VECTOR_DB', value: 'lancedb' },
@@ -364,7 +364,7 @@ export const createApiKeyForNotebook = async (
                   'https://granite-3-3-8b-instruct-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1',
               },
               { key: 'API_KEY', value: apiKey },
-              { key: 'MODEL_NAME', value: 'granite-3-8b-instruct' },
+              { key: 'MODEL_NAME', value: 'granite-3-3-8b-instruct' },
             ],
           },
         };
